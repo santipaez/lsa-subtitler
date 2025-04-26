@@ -6,20 +6,31 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import os
 from tqdm import tqdm
+from collections import Counter
 
 # Paths
 meta_path = "data/meta.csv"
 keypoints_path = "data/keypoints.h5"
 
-# Parámetros
-MAX_SEQ_LEN = 60  # Máximo de frames por clip (ajustable)
-N_KEYPOINTS = 33  # Ajustar según cantidad de keypoints por persona
-N_FEATURES = 4    # x, y, z, confidence
-
-# 1. Cargar meta.csv
+# Cargar meta antes de cualquier uso
 meta = pd.read_csv(meta_path)
 
-# 2. Cargar keypoints.h5
+# Agrupar los labels por la primera palabra (o gesto principal)
+def extraer_label_simple(frase):
+    # Puedes mejorar esta función para extraer la palabra clave relevante
+    return frase.strip().split()[0].lower()
+
+meta['label_simple'] = meta['label'].apply(extraer_label_simple)
+conteo = Counter(meta['label_simple'])
+clases_validas = [c for c, n in conteo.items() if n >= 10]
+meta = meta[meta['label_simple'].isin(clases_validas)].reset_index(drop=True)
+print(f"Clases simples válidas (>=10 ejemplos): {len(clases_validas)}")
+
+# Parámetros
+MAX_SEQ_LEN = 60  # Máximo de frames por clip
+N_KEYPOINTS = 33
+N_FEATURES = 4    # x, y, z, confidence
+
 def load_keypoints(clip_id, signer_id="signer_0"):
     with h5py.File(keypoints_path, "r") as f:
         group_names = [clip_id, clip_id + ".mp4"]
@@ -43,22 +54,16 @@ def load_keypoints(clip_id, signer_id="signer_0"):
             return kp
     return None
 
-# Mostrar algunos ids de meta.csv y keypoints.h5 para depuración
-# print("Primeros 5 ids en meta.csv:", meta["id"].head().tolist())
-# with h5py.File(keypoints_path, "r") as f:
-#     h5_ids = list(f.keys())
-#     print("Primeros 5 grupos en keypoints.h5:", h5_ids[:5])
+labels = meta["label_simple"].unique().tolist()
+label2idx = {l: i for i, l in enumerate(labels)}
 
 X = []
 y = []
-labels = meta["label"].unique().tolist()
-label2idx = {l: i for i, l in enumerate(labels)}
-
 count = 0
 not_found = 0
 for _, row in tqdm(meta.iterrows(), total=len(meta), desc="Procesando clips"):
     clip_id = row["id"]
-    label = row["label"]
+    label = row["label_simple"]
     kp = load_keypoints(clip_id)
     if kp is not None:
         seq = np.zeros((MAX_SEQ_LEN, N_KEYPOINTS, N_FEATURES))
@@ -77,7 +82,6 @@ print(f"Clips sin keypoints: {not_found}")
 X = np.array(X)
 y = np.array(y)
 
-# 4. Definir modelo simple (LSTM)
 model = keras.Sequential([
     layers.Input(shape=(MAX_SEQ_LEN, N_KEYPOINTS, N_FEATURES)),
     layers.Reshape((MAX_SEQ_LEN, N_KEYPOINTS * N_FEATURES)),
@@ -89,13 +93,18 @@ model = keras.Sequential([
 
 model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
-# 5. Entrenar
-model.fit(X, y, epochs=10, batch_size=32, validation_split=0.1)
+model.fit(X, y, epochs=200, batch_size=64, validation_split=0.1)
 
-# 6. Guardar modelo y labels
 model.save("lsa_sign_model.keras")
 with open("labels.txt", "w", encoding="utf-8") as f:
     for l in labels:
         f.write(l + "\n")
 
 print("Entrenamiento finalizado. Modelo guardado como lsa_sign_model.keras")
+
+label_counts = Counter(y)
+print(f"Cantidad de clases usadas en el entrenamiento: {len(label_counts)}")
+print("Ejemplos por clase (top 20):")
+for label_idx, count in label_counts.most_common(20):
+    print(f"  {labels[label_idx]}: {count}")
+# Si quieres ver todas las clases, elimina el [:20]

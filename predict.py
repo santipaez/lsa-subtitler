@@ -1,7 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-# Cargar modelo y labels
 model = tf.keras.models.load_model("lsa_sign_model.keras")
 with open("labels.txt", "r", encoding="utf-8") as f:
     labels = [line.strip() for line in f.readlines()]
