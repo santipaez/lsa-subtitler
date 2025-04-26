@@ -8,4 +8,6 @@ lsa_sign_model.keras
 labels.txt
 documentation.md
 temp_keypoints.npy
-transcripcion.txt
+transcription.txt
+normalization.txt
+static/
