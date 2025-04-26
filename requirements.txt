@@ -5,3 +5,7 @@ pandas
 numpy
 mediapipe
 opencv-python
+scikit-learn
+seaborn
+matplotlib
+flask
