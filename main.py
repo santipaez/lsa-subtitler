@@ -38,7 +38,9 @@ def transcribe_videos_from_folder_segmented(video_folder, model_path, labels_pat
     video_files = glob.glob(os.path.join(video_folder, "*.mp4"))
     from train import x_min, x_max, y_min, y_max
     transcripciones = {}
-    for video in tqdm(video_files, desc="Transcribiendo videos"):
+    for video in tqdm(video_files, desc="Transcribiendo videos", 
+                     bar_format='{desc}: {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]',
+                     mininterval=1.0, maxinterval=5.0, ncols=80, leave=False):
         transcripcion = segment_and_transcribe_video(
             video, model, labels, x_min, x_max, y_min, y_max, window_size, step_size
         )

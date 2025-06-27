@@ -15,16 +15,18 @@ keypoints_path = "data/keypoints.h5"
 # Cargar meta antes de cualquier uso
 meta = pd.read_csv(meta_path)
 
-# Agrupar los labels por la primera palabra (o gesto principal)
-def extraer_label_simple(frase):
-    # Puedes mejorar esta función para extraer la palabra clave relevante
-    return frase.strip().split()[0].lower()
-
-meta['label_simple'] = meta['label'].apply(extraer_label_simple)
-conteo = Counter(meta['label_simple'])
-clases_validas = [c for c, n in conteo.items() if n >= 10]
-meta = meta[meta['label_simple'].isin(clases_validas)].reset_index(drop=True)
-print(f"Clases simples válidas (>=10 ejemplos): {len(clases_validas)}")
+# Usar la frase completa como label
+conteo_frases = Counter(meta['label'])
+# Filtra frases frecuentes (por ejemplo, al menos 3 ejemplos)
+frases_validas = [f for f, n in conteo_frases.items() if n >= 3]
+meta = meta[meta['label'].isin(frases_validas)].reset_index(drop=True)
+print(f"Frases válidas (>=3 ejemplos): {len(frases_validas)}")
+print(f"Ejemplos después del filtrado: {len(meta)}")
+if len(meta) == 0:
+    print("No hay datos tras el filtrado. Top 10 frases más frecuentes:")
+    for frase, n in conteo_frases.most_common(10):
+        print(f"{frase}: {n}")
+    exit()
 
 # Parámetros
 MAX_SEQ_LEN = 60  # Máximo de frames por clip
@@ -54,16 +56,18 @@ def load_keypoints(clip_id, signer_id="signer_0"):
             return kp
     return None
 
-labels = meta["label_simple"].unique().tolist()
+labels = meta["label"].unique().tolist()
 label2idx = {l: i for i, l in enumerate(labels)}
 
 X = []
 y = []
 count = 0
 not_found = 0
-for _, row in tqdm(meta.iterrows(), total=len(meta), desc="Procesando clips"):
+for _, row in tqdm(meta.iterrows(), total=len(meta), desc="Procesando clips", 
+                  bar_format='{desc}: {percentage:3.0f}% |{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]',
+                  mininterval=1.0, maxinterval=5.0, ncols=80, leave=False):
     clip_id = row["id"]
-    label = row["label_simple"]
+    label = row["label"]
     kp = load_keypoints(clip_id)
     if kp is not None:
         seq = np.zeros((MAX_SEQ_LEN, N_KEYPOINTS, N_FEATURES))
@@ -79,6 +83,8 @@ for _, row in tqdm(meta.iterrows(), total=len(meta), desc="Procesando clips"):
 print(f"Clips cargados: {count}")
 print(f"Clips sin keypoints: {not_found}")
 
+# NOTA: Para avanzar a un modelo seq2seq (traducción libre), deberás tokenizar las frases y usar un modelo encoder-decoder o CTC.
+# Este pipeline es para clasificación de frases frecuentes (demo rápida).
 X = np.array(X)
 y = np.array(y)
 

@@ -1,0 +1,970 @@
+  [ 6.75964355e-03  4.22668457e-03  9.98535156e-01]
+  [-1.39617920e-02 -1.24206543e-02  9.97558594e-01]
+  ...
+  [ 4.20532227e-02 -2.38647461e-02  1.19873047e-01]
+  [-2.81715393e-03  2.55584717e-03  2.56347656e-02]
+  [-7.29560852e-04 -2.36053467e-02  7.17163086e-02]]
+
+ ...
+
+ [[ 1.01470947e-02  2.32391357e-02  9.96582031e-01]
+  [-5.38253784e-03  4.23049927e-03  9.97070312e-01]
+  [-6.46972656e-03 -7.65991211e-03  9.96093750e-01]
+  ...
+  [ 1.89971924e-02  1.54113770e-02  2.40600586e-01]
+  [-2.30712891e-02 -7.76052475e-05  1.25732422e-01]
+  [ 8.72039795e-03 -2.78472900e-02  1.39526367e-01]]
+
+ [[ 8.06236267e-03  7.69042969e-03  9.96582031e-01]
+  [ 7.87544250e-03  9.95826721e-03  9.97314453e-01]
+  [ 3.34930420e-03  4.31060791e-03  9.96093750e-01]
+  ...
+  [ 5.58853149e-03 -1.17645264e-02  2.43957520e-01]
+  [-2.55432129e-02 -1.64114833e-02  1.24694824e-01]
+  [ 4.41080332e-03 -4.57763672e-04  1.42578125e-01]]
+
+ [[ 5.97763062e-03 -7.85827637e-03  9.96582031e-01]
+  [ 2.11334229e-02  1.56860352e-02  9.97558594e-01]
+  [ 1.31683350e-02  1.62811279e-02  9.96093750e-01]
+  ...
+  [-7.82012939e-03 -3.89404297e-02  2.47314453e-01]
+  [-2.80151367e-02 -3.27453613e-02  1.23657227e-01]
+  [ 1.01208687e-04  2.69317627e-02  1.45629883e-01]]]
+Aplicando normalización a datos de entrada...
+Pre-procesamiento: Normalizando datos de entrada...
+Normalización aplicada. Media: [-1.6080121e-06  3.7227981e-06  7.0691961e-01], Std: [0.01404549 0.01402922 0.41099167]
+2025-05-09 17:34:04.711393: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:From c:\Users\Santiago\Documents\Facultad\TIF\lsa-subtitler\.venv\lib\site-packages\keras\src\backend\tensorflow\core.py:219: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+Model: "functional"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                  ┃ Output Shape              ┃         Param # ┃ Connected to               ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ encoder_inputs (InputLayer)   │ (None, 30, 33, 3)         │               0 │ -                          │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ reshape (Reshape)             │ (None, 30, 99)            │               0 │ encoder_inputs[0][0]       │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ input_normalization           │ (None, 30, 99)            │             396 │ reshape[0][0]              │
+│ (BatchNormalization)          │                           │                 │                            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ not_equal_1 (NotEqual)        │ (None, 30, 99)            │               0 │ input_normalization[0][0]  │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ masking (Masking)             │ (None, 30, 99)            │               0 │ input_normalization[0][0]  │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ any_1 (Any)                   │ (None, 30)                │               0 │ not_equal_1[0][0]          │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ bidirectional (Bidirectional) │ [(None, 30, 256), (None,  │         233,472 │ masking[0][0], any_1[0][0] │
+│                               │ 128), (None, 128), (None, │                 │                            │
+│                               │ 128), (None, 128)]        │                 │                            │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ concatenate (Concatenate)     │ (None, 256)               │               0 │ bidirectional[0][1],       │
+│                               │                           │                 │ bidirectional[0][3]        │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ decoder_inputs (InputLayer)   │ (None, 29)                │               0 │ -                          │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense (Dense)                 │ (None, 128)               │          32,896 │ concatenate[0][0]          │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ embedding_layer (Embedding)   │ (None, 29, 128)           │         640,000 │ decoder_inputs[0][0]       │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ bahdanau_attention            │ [(None, 256), (None, 30,  │          49,280 │ dense[0][0],               │
+│ (BahdanauAttention)           │ 1)]                       │                 │ bidirectional[0][0]        │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dropout (Dropout)             │ (None, 29, 128)           │               0 │ embedding_layer[0][0]      │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ lambda (Lambda)               │ (None, 29, 256)           │               0 │ bahdanau_attention[0][0]   │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ concatenate_1 (Concatenate)   │ (None, 256)               │               0 │ bidirectional[0][2],       │
+│                               │                           │                 │ bidirectional[0][4]        │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ concatenate_2 (Concatenate)   │ (None, 29, 384)           │               0 │ dropout[0][0],             │
+│                               │                           │                 │ lambda[0][0]               │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ dense_1 (Dense)               │ (None, 128)               │          32,896 │ concatenate_1[0][0]        │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ decoder_lstm (LSTM)           │ (None, 29, 128)           │         262,656 │ concatenate_2[0][0],       │
+│                               │                           │                 │ dense[0][0], dense_1[0][0] │
+├───────────────────────────────┼───────────────────────────┼─────────────────┼────────────────────────────┤
+│ output_layer (Dense)          │ (None, 29, 5000)          │         645,000 │ decoder_lstm[0][0]         │
+└───────────────────────────────┴───────────────────────────┴─────────────────┴────────────────────────────┘
+ Total params: 1,896,596 (7.23 MB)
+ Trainable params: 1,896,398 (7.23 MB)
+ Non-trainable params: 198 (792.00 B)
+None
+
+Iniciando entrenamiento con modelo optimizado...
+
+Comenzando entrenamiento con curriculum learning...
+Curriculum learning (época 0): usando 1144 ejemplos con longitud <= 5
+
+Epoch 1/50 - Teacher forcing ratio: 1.00
+Curriculum learning: usando 1144/13516 ejemplos
+Epoch 1/50
+2025-05-09 17:34:16.684246: E tensorflow/core/util/util.cc:131] oneDNN supports DT_BOOL only on platforms with AVX-512. Falling back to 
+the default Eigen-based implementation if present.
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 254ms/step - accuracy: 0.0671 - loss: 6.1012       
+Epoch 1: val_loss improved from inf to 5.28701, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 127s 275ms/step - accuracy: 0.0671 - loss: 6.1001 - val_accuracy: 0.0931 - val_loss: 5.2870 - learning_rate: 0.0010
+Curriculum learning (época 1): usando 2778 ejemplos con longitud <= 8
+
+Epoch 2/50 - Teacher forcing ratio: 0.99
+Curriculum learning: usando 2778/13516 ejemplos
+Epoch 2/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 247ms/step - accuracy: 0.0943 - loss: 5.1281  
+Epoch 2: val_loss improved from 5.28701 to 5.02439, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 113s 266ms/step - accuracy: 0.0943 - loss: 5.1279 - val_accuracy: 0.1076 - val_loss: 5.0244 - learning_rate: 0.0010
+Curriculum learning (época 2): usando 4946 ejemplos con longitud <= 11
+
+Epoch 3/50 - Teacher forcing ratio: 0.98
+Curriculum learning: usando 4946/13516 ejemplos
+Epoch 3/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 246ms/step - accuracy: 0.1076 - loss: 4.8081  
+Epoch 3: val_loss improved from 5.02439 to 4.89070, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 111s 263ms/step - accuracy: 0.1076 - loss: 4.8080 - val_accuracy: 0.1124 - val_loss: 4.8907 - learning_rate: 0.0010
+Curriculum learning (época 3): usando 6856 ejemplos con longitud <= 14
+
+Epoch 4/50 - Teacher forcing ratio: 0.97
+Curriculum learning: usando 6856/13516 ejemplos
+Epoch 4/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 241ms/step - accuracy: 0.1175 - loss: 4.6017  
+Epoch 4: val_loss improved from 4.89070 to 4.78835, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 110s 259ms/step - accuracy: 0.1175 - loss: 4.6017 - val_accuracy: 0.1153 - val_loss: 4.7883 - learning_rate: 0.0010
+Curriculum learning (época 4): usando 8266 ejemplos con longitud <= 17
+
+Epoch 5/50 - Teacher forcing ratio: 0.96
+Curriculum learning: usando 8266/13516 ejemplos
+Epoch 5/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 241ms/step - accuracy: 0.1243 - loss: 4.4204  
+Epoch 5: val_loss improved from 4.78835 to 4.70017, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 109s 258ms/step - accuracy: 0.1243 - loss: 4.4204 - val_accuracy: 0.1182 - val_loss: 4.7002 - learning_rate: 0.0010
+
+Epoch 6/50 - Teacher forcing ratio: 0.95
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 6/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 310ms/step - accuracy: 0.1287 - loss: 4.2587  
+Epoch 6: val_loss improved from 4.70017 to 4.64118, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 142s 336ms/step - accuracy: 0.1287 - loss: 4.2586 - val_accuracy: 0.1200 - val_loss: 4.6412 - learning_rate: 0.0010
+
+Epoch 7/50 - Teacher forcing ratio: 0.94
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 7/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 279ms/step - accuracy: 0.1320 - loss: 4.1243  
+Epoch 7: val_loss improved from 4.64118 to 4.59991, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 127s 300ms/step - accuracy: 0.1320 - loss: 4.1243 - val_accuracy: 0.1214 - val_loss: 4.5999 - learning_rate: 0.0010
+
+Epoch 8/50 - Teacher forcing ratio: 0.93
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 8/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 299ms/step - accuracy: 0.1341 - loss: 4.0170  
+Epoch 8: val_loss improved from 4.59991 to 4.57041, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 136s 321ms/step - accuracy: 0.1341 - loss: 4.0170 - val_accuracy: 0.1228 - val_loss: 4.5704 - learning_rate: 0.0010
+
+Epoch 9/50 - Teacher forcing ratio: 0.92
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 9/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 300ms/step - accuracy: 0.1381 - loss: 3.9353  
+Epoch 9: val_loss improved from 4.57041 to 4.55149, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 135s 319ms/step - accuracy: 0.1381 - loss: 3.9353 - val_accuracy: 0.1236 - val_loss: 4.5515 - learning_rate: 0.0010
+
+Epoch 10/50 - Teacher forcing ratio: 0.91
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 10/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 280ms/step - accuracy: 0.1404 - loss: 3.8248  
+Epoch 10: val_loss improved from 4.55149 to 4.53693, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 126s 299ms/step - accuracy: 0.1404 - loss: 3.8249 - val_accuracy: 0.1247 - val_loss: 4.5369 - learning_rate: 0.0010
+
+Epoch 11/50 - Teacher forcing ratio: 0.90
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 11/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 281ms/step - accuracy: 0.1424 - loss: 3.7546  
+Epoch 11: val_loss improved from 4.53693 to 4.53363, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 128s 303ms/step - accuracy: 0.1423 - loss: 3.7546 - val_accuracy: 0.1251 - val_loss: 4.5336 - learning_rate: 0.0010
+
+Epoch 12/50 - Teacher forcing ratio: 0.89
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 12/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 309ms/step - accuracy: 0.1442 - loss: 3.6928  
+Epoch 12: val_loss improved from 4.53363 to 4.52677, saving model to lsa_seq2seq_best_model.keras
+423/423 ━━━━━━━━━━━━━━━━━━━━ 139s 329ms/step - accuracy: 0.1442 - loss: 3.6928 - val_accuracy: 0.1258 - val_loss: 4.5268 - learning_rate: 0.0010
+
+Epoch 13/50 - Teacher forcing ratio: 0.88
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 13/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 317ms/step - accuracy: 0.1450 - loss: 3.6268  
+Epoch 13: val_loss did not improve from 4.52677
+423/423 ━━━━━━━━━━━━━━━━━━━━ 143s 339ms/step - accuracy: 0.1450 - loss: 3.6268 - val_accuracy: 0.1263 - val_loss: 4.5279 - learning_rate: 0.0010
+
+Epoch 14/50 - Teacher forcing ratio: 0.87
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 14/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 122s 288ms/step - accuracy: 0.1479 - loss: 3.5620 - val_accuracy: 0.1260 - val_loss: 4.5250 - learning_rate: 0.0010
+                                                                                                                                        : 0.0010
+Epoch 15/50 - Teacher forcing ratio: 0.86
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 15/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 289ms/step - accuracy: 0.1505 - loss: 3.4966
+Epoch 15: val_loss did not improve from 4.52501
+423/423 ━━━━━━━━━━━━━━━━━━━━ 132s 313ms/step - accuracy: 0.1505 - loss: 3.4966 - val_accuracy: 0.1259 - val_loss: 4.5379 - learning_rate learning_rate: 0.0010                                                                                                                  : 0.0010
+
+Epoch 16/50 - Teacher forcing ratio: 0.85
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 16/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 314ms/step - accuracy: 0.1518 - loss: 3.4510
+Epoch 16: val_loss did not improve from 4.52501
+423/423 ━━━━━━━━━━━━━━━━━━━━ 141s 334ms/step - accuracy: 0.1518 - loss: 3.4510 - val_accuracy: 0.1264 - val_loss: 4.5451 - learning_rate learning_rate: 0.0010
+
+Epoch 17/50 - Teacher forcing ratio: 0.84
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 17/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 325ms/step - accuracy: 0.1529 - loss: 3.3916  
+Epoch 17: ReduceLROnPlateau reducing learning rate to 0.0005000000237487257.
+
+Epoch 17: val_loss did not improve from 4.52501
+423/423 ━━━━━━━━━━━━━━━━━━━━ 148s 350ms/step - accuracy: 0.1529 - loss: 3.3917 - val_accuracy: 0.1269 - val_loss: 4.5526 - learning_rate: 0.0010
+
+Epoch 18/50 - Teacher forcing ratio: 0.83
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 18/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 373ms/step - accuracy: 0.1535 - loss: 3.3335  
+Epoch 18: val_loss did not improve from 4.52501
+423/423 ━━━━━━━━━━━━━━━━━━━━ 166s 393ms/step - accuracy: 0.1535 - loss: 3.3336 - val_accuracy: 0.1260 - val_loss: 4.5532 - learning_rate: 5.0000e-04
+
+Epoch 19/50 - Teacher forcing ratio: 0.82
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 19/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 338ms/step - accuracy: 0.1559 - loss: 3.2971  
+Epoch 19: val_loss did not improve from 4.52501
+423/423 ━━━━━━━━━━━━━━━━━━━━ 155s 368ms/step - accuracy: 0.1559 - loss: 3.2972 - val_accuracy: 0.1277 - val_loss: 4.5540 - learning_rate: 5.0000e-04 learning_rate: 5.0000e-04
+
+Epoch 20/50 - Teacher forcing ratio: 0.81
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 20/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 364ms/step - accuracy: 0.1564 - loss: 3.2795
+Epoch 20: val_loss did not improve from 4.52501                                                                            learning_rate: 5.0000e-04
+423/423 ━━━━━━━━━━━━━━━━━━━━ 165s 389ms/step - accuracy: 0.1564 - loss: 3.2795 - val_accuracy: 0.1267 - val_loss: 4.5578 - learning_rate: 5.0000e-04
+
+Epoch 21/50 - Teacher forcing ratio: 0.80
+Curriculum learning: usando 13516/13516 ejemplos
+Epoch 21/50
+423/423 ━━━━━━━━━━━━━━━━━━━━ 0s 359ms/step - accuracy: 0.1582 - loss: 3.2458
+Epoch 21: ReduceLROnPlateau reducing learning rate to 0.0002500000118743628.
+
+Epoch 21: val_loss did not improve from 4.52501
+423/423 ━━━━━━━━━━━━━━━━━━━━ 162s 383ms/step - accuracy: 0.1582 - loss: 3.2458 - val_accuracy: 0.1272 - val_loss: 4.5665 - learning_rate: 5.0000e-04
+Epoch 21: early stopping
+Restoring model weights from the end of the best epoch: 14.
+Entrenamiento finalizado. Modelo guardado como lsa_seq2seq_model.keras
+
+EJEMPLOS DE TRADUCCIÓN (ground truth vs. predicción):
+c:\Users\Santiago\Documents\Facultad\TIF\lsa-subtitler\.venv\lib\site-packages\keras\src\layers\layer.py:940: UserWarning: Layer 'lambda_1' (of type Lambda) was passed an input with a mask attached to it. However, this layer does not support masking and will therefore destroy the mask information. Downstream layers will not see the mask.
+  warnings.warn(
+c:\Users\Santiago\Documents\Facultad\TIF\lsa-subtitler\.venv\lib\site-packages\keras\src\layers\layer.py:940: UserWarning: Layer 'lambda_2' (of type Lambda) was passed an input with a mask attached to it. However, this layer does not support masking and will therefore destroy the mask information. Downstream layers will not see the mask.
+  warnings.warn(
+c:\Users\Santiago\Documents\Facultad\TIF\lsa-subtitler\.venv\lib\site-packages\keras\src\layers\layer.py:940: UserWarning: Layer 'lambda_3' (of type Lambda) was passed an input with a mask attached to it. However, this layer does not support masking and will therefore destroy the mask information. Downstream layers will not see the mask.
+  warnings.warn(
+c:\Users\Santiago\Documents\Facultad\TIF\lsa-subtitler\.venv\lib\site-packages\keras\src\layers\layer.py:940: UserWarning: Layer 'lambda_4' (of type Lambda) was passed an input with a mask attached to it. However, this layer does not support masking and will therefore destroy the mask information. Downstream layers will not see the mask.
+  warnings.warn(
+c:\Users\Santiago\Documents\Facultad\TIF\lsa-subtitler\.venv\lib\site-packages\keras\src\layers\layer.py:940: UserWarning: Layer 'reshape_1' (of type Reshape) was passed an input with a mask attached to it. However, this layer does not support 
+masking and will therefore destroy the mask information. Downstream layers will not see the mask.
+  warnings.warn(
+
+=== EVALUACIÓN CON MÉTRICAS AUTOMÁTICAS ===
+Evaluando 10 ejemplos aleatorios...
+
+1/1 ━━━━━━━━━━━━━━━━━━━━ 1s 734ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 255ms/step
+Paso 0 | Top tokens: [('altos', 0.1999649), ('grasas', 0.20051622), ('mí', 0.20089759)]
+Token seleccionado: presentarse (id: 3413)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 1 | Top tokens: [('mí', 0.19978593), ('altos', 0.20085861), ('grasas', 0.20150314)]
+Token seleccionado: suele (id: 2098)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 2 | Top tokens: [('cuánto', 0.19962694), ('vacunas,', 0.19984765), ('altos', 0.20143336)]
+Token seleccionado: grasas (id: 3644)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 3 | Top tokens: [('balde', 0.19988696), ('cuánto', 0.19993883), ('altos', 0.20072545)]
+Token seleccionado: balde (id: 3212)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 63ms/step
+Paso 4 | Top tokens: [('cuánto', 0.1999031), ('altos', 0.20017098), ('fiestas,', 0.20063716)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 88ms/step
+Paso 5 | Top tokens: [('vacunas,', 0.19980238), ('fiestas,', 0.20050824), ('basura?', 0.20079471)]
+Token seleccionado: vacunas, (id: 1380)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 87ms/step
+Paso 6 | Top tokens: [('españa', 0.20001207), ('fiestas,', 0.20021045), ('basura?', 0.20144366)]
+Token seleccionado: detalle (id: 4709)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 167ms/step
+Paso 7 | Top tokens: [('españa', 0.19967109), ('fiestas,', 0.19996047), ('basura?', 0.20178607)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 67ms/step
+Paso 8 | Top tokens: [('accesible', 0.19997434), ('san', 0.2000537), ('fiestas,', 0.20017183)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step
+Paso 9 | Top tokens: [('conexión', 0.19997536), ('personal,', 0.20005596), ('san', 0.2001176)]
+Token seleccionado: san (id: 375)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 10 | Top tokens: [('emprendedores', 0.19997616), ('basura.', 0.20006528), ('personal,', 0.20037864)]
+Token seleccionado: basura. (id: 1099)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 11 | Top tokens: [('convocan', 0.19990988), ('emprendedores', 0.20033054), ('personal,', 0.20049326)]
+Token seleccionado: personal, (id: 1413)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 55ms/step
+Paso 12 | Top tokens: [('conexión', 0.19972861), ('convocan', 0.20018178), ('emprendedores', 0.20068313)]
+Token seleccionado: convocan (id: 4274)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 65ms/step
+Paso 13 | Top tokens: [('instructora', 0.19976692), ('sociales', 0.19995616), ('emprendedores', 0.2009734)]
+Token seleccionado: sorda, (id: 430)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 14 | Top tokens: [('vs', 0.1998914), ('sociales', 0.19990206), ('emprendedores', 0.20123667)]
+Token seleccionado: vs (id: 3422)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 83ms/step
+Paso 15 | Top tokens: [('sociales', 0.19979574), ('altos', 0.19992623), ('emprendedores', 0.2012793)]
+Token seleccionado: instructora (id: 3971)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 58ms/step
+Paso 16 | Top tokens: [('sociales', 0.19972037), ('altos', 0.20004909), ('emprendedores', 0.20121211)]
+Token seleccionado: acompañan (id: 4991)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 58ms/step
+Paso 17 | Top tokens: [('sociales', 0.1996813), ('altos', 0.20003991), ('emprendedores', 0.20136993)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 57ms/step
+Paso 18 | Top tokens: [('altos', 0.19957942), ('basura?', 0.20091341), ('emprendedores', 0.20100446)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 19 | Top tokens: [('altos', 0.19982468), ('fiestas,', 0.19989012), ('emprendedores', 0.20118803)]
+Token seleccionado: sociales (id: 552)
+Ejemplo #1969
+REFERENCIA: la aparición de este personaje es importante porque además, de representar a los nativos americanos es poco frecuente ver superhéroes con discapacidad sensorial cómo la sordera.
+PREDICCIÓN: presentarse suele grasas balde altos vacunas, detalle basura? fiestas, san basura. personal, convocan sorda, vs instructora acompañan apenas basura? sociales
+MÉTRICAS: BLEU=0.000, WER=1.000
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 0 | Top tokens: [('seguirnos', 0.19988713), ('participar,', 0.20033613), ('mí', 0.20076098)]
+Token seleccionado: creado (id: 4139)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 1 | Top tokens: [('seguirnos', 0.19957148), ('cual,', 0.19966528), ('mí', 0.20303552)]
+Token seleccionado: seguirnos (id: 4992)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 2 | Top tokens: [('buscando', 0.1990379), ('cual,', 0.20091207), ('mí', 0.20331891)]
+Token seleccionado: buscando (id: 1632)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 3 | Top tokens: [('apenas', 0.19927803), ('cual,', 0.20153219), ('mí', 0.20267467)]
+Token seleccionado: mí (id: 641)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 4 | Top tokens: [('apenas', 0.19965899), ('determinada', 0.19966684), ('cual,', 0.2023162)]
+Token seleccionado: mantenerse (id: 2126)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 5 | Top tokens: [('corrientes', 0.19946428), ('determinada', 0.20046763), ('cual,', 0.20188308)]
+Token seleccionado: poquito. (id: 3165)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 6 | Top tokens: [('corrientes', 0.19994512), ('determinada', 0.20051576), ('cual,', 0.20123953)]
+Token seleccionado: corrientes (id: 4375)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 7 | Top tokens: [('cual,', 0.200272), ('manera', 0.20027825), ('determinada', 0.20045947)]
+Token seleccionado: aumento (id: 770)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 8 | Top tokens: [('correcto', 0.20003347), ('determinada', 0.20019951), ('manera', 0.20081674)]
+Token seleccionado: correcto (id: 4788)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step
+Paso 9 | Top tokens: [('realidad', 0.19988018), ('determinada', 0.19998963), ('manera', 0.20146854)]
+Token seleccionado: realidad (id: 1133)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 70ms/step
+Paso 10 | Top tokens: [('transmitir', 0.19974437), ('determinada', 0.19990762), ('manera', 0.20176464)]
+Token seleccionado: personal, (id: 1413)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 11 | Top tokens: [('determinada', 0.19965254), ('transmitir', 0.19978285), ('manera', 0.20198418)]
+Token seleccionado: corbacho, (id: 4483)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 12 | Top tokens: [('epecuén,', 0.1993234), ('transmitir', 0.20007353), ('manera', 0.20226476)]
+Token seleccionado: jurada (id: 3217)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 13 | Top tokens: [('buscando', 0.19970058), ('transmitir', 0.1999917), ('manera', 0.20233767)]
+Token seleccionado: epecuén, (id: 3013)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 55ms/step
+Paso 14 | Top tokens: [('buscando', 0.1994909), ('transmitir', 0.19993952), ('manera', 0.20244525)]
+Token seleccionado: transmitir (id: 2908)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step
+Paso 15 | Top tokens: [('buscando', 0.19945355), ('¿bien?', 0.19962178), ('manera', 0.20275941)]
+Token seleccionado: ¿bien? (id: 4102)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 16 | Top tokens: [('dijo', 0.19941054), ('buscando', 0.19953887), ('manera', 0.20289311)]
+Token seleccionado: decirles (id: 4302)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 17 | Top tokens: [('buscando', 0.19931626), ('dijo', 0.19962254), ('manera', 0.2029017)]
+Token seleccionado: unos (id: 476)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 91ms/step
+Paso 18 | Top tokens: [('juntos,', 0.19916698), ('dijo', 0.19962241), ('manera', 0.20293932)]
+Token seleccionado: juntos, (id: 3766)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 55ms/step
+Paso 19 | Top tokens: [('dijo', 0.19884938), ('manera', 0.202166), ('correcto', 0.20239897)]
+Token seleccionado: dijo (id: 955)
+Ejemplo #1221
+REFERENCIA: sin embargo, no son más letales ni causan síntomas diversos.
+PREDICCIÓN: creado seguirnos buscando mí mantenerse poquito. corrientes aumento correcto realidad personal, corbacho, jurada epecuén, transmitir ¿bien? decirles unos juntos, dijo
+MÉTRICAS: BLEU=0.000, WER=2.000
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 0 | Top tokens: [('especialistas,', 0.19944021), ('internacionales', 0.1999832), ('altos', 0.20204742)]
+Token seleccionado: internacionales (id: 3079)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 1 | Top tokens: [('fiestas,', 0.19937903), ('apenas', 0.19944575), ('altos', 0.20315935)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 2 | Top tokens: [('mí', 0.19909984), ('fiestas,', 0.20158842), ('altos', 0.20328707)]
+Token seleccionado: novedades (id: 1203)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 3 | Top tokens: [('mí', 0.19902164), ('fiestas,', 0.20231004), ('altos', 0.2024338)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 4 | Top tokens: [('mí', 0.19932112), ('altos', 0.20143603), ('fiestas,', 0.20266923)]
+Token seleccionado: muestra (id: 2854)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 5 | Top tokens: [('mí', 0.1996923), ('altos', 0.20049651), ('fiestas,', 0.20260955)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step
+Paso 6 | Top tokens: [('actor', 0.19963251), ('mí', 0.19969945), ('fiestas,', 0.20263113)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 43ms/step
+Paso 7 | Top tokens: [('mí', 0.19974346), ('actor', 0.2001599), ('llegan', 0.20089762)]
+Token seleccionado: llegan (id: 1624)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 8 | Top tokens: [('covid,', 0.19993116), ('futuro.', 0.20006979), ('actor', 0.20017791)]
+Token seleccionado: actor (id: 1817)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 9 | Top tokens: [('alumnos', 0.20001076), ('instructora', 0.20008574), ('covid,', 0.20017695)]
+Token seleccionado: instructora (id: 3971)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 10 | Top tokens: [('covid,', 0.20001511), ('sorda,', 0.20013589), ('personal,', 0.20019543)]
+Token seleccionado: covid, (id: 1665)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 11 | Top tokens: [('emprendedores', 0.20004663), ('colectivos', 0.20005347), ('sorda,', 0.20010458)]
+Token seleccionado: personal, (id: 1413)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 12 | Top tokens: [('sorda,', 0.20017597), ('colectivos', 0.20021126), ('emprendedores', 0.20033541)]
+Token seleccionado: alumnos (id: 1442)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 13 | Top tokens: [('sorda,', 0.20007485), ('colectivos', 0.20025182), ('emprendedores', 0.2006456)]
+Token seleccionado: sorda, (id: 430)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 14 | Top tokens: [('colectivos', 0.20010617), ('emprendedores', 0.200626), ('basura?', 0.20086828)]
+Token seleccionado: acompañan (id: 4991)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step
+Paso 15 | Top tokens: [('colectivos', 0.20016491), ('basura?', 0.20066541), ('emprendedores', 0.20078866)]
+Token seleccionado: colectivos (id: 4193)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 16 | Top tokens: [('altos', 0.2003419), ('basura?', 0.20049922), ('emprendedores', 0.20077023)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step
+Paso 17 | Top tokens: [('altos', 0.20019972), ('emprendedores', 0.20059429), ('fiestas,', 0.20082036)]
+Token seleccionado: emprendedores (id: 4537)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 88ms/step
+Paso 18 | Top tokens: [('llegan', 0.1996357), ('altos', 0.20033595), ('fiestas,', 0.20099126)]
+Token seleccionado: llegan (id: 1624)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 63ms/step
+Paso 19 | Top tokens: [('da', 0.19988953), ('altos', 0.20042726), ('fiestas,', 0.20103993)]
+Token seleccionado: fiestas, (id: 4399)
+Ejemplo #2718
+REFERENCIA: es hora de volver al ciclo, es hora de reciclar.
+PREDICCIÓN: internacionales apenas novedades basura? muestra altos fiestas, llegan actor instructora covid, personal, alumnos sorda, acompañan colectivos basura? emprendedores llegan fiestas,
+MÉTRICAS: BLEU=0.000, WER=2.000
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 68ms/step
+Paso 0 | Top tokens: [('internacionales', 0.20035058), ('mí', 0.20078032), ('realizan', 0.20125504)]
+Token seleccionado: municipio (id: 648)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 1 | Top tokens: [('mí', 0.1999487), ('altos', 0.19996217), ('realizan', 0.20070663)]
+Token seleccionado: mí (id: 641)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 2 | Top tokens: [('realizan', 0.20002845), ('proyectos.', 0.20012729), ('altos', 0.20100492)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 3 | Top tokens: [('especialistas', 0.19995058), ('fiestas,', 0.2003419), ('proyectos.', 0.20047309)]
+Token seleccionado: proyectos. (id: 1729)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 4 | Top tokens: [('basura?', 0.20028725), ('especialistas', 0.20044155), ('fiestas,', 0.2008701)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 5 | Top tokens: [('manera', 0.19930647), ('especialistas', 0.20109877), ('basura?', 0.20119682)]
+Token seleccionado: manera (id: 193)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 6 | Top tokens: [('llegan', 0.19965746), ('especialistas', 0.20061833), ('basura?', 0.20114581)]
+Token seleccionado: poco. (id: 1953)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 58ms/step
+Paso 7 | Top tokens: [('especialistas', 0.2002458), ('llegan', 0.20036802), ('basura?', 0.20109245)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 8 | Top tokens: [('vs', 0.19998333), ('especialistas', 0.20036827), ('llegan', 0.20088428)]
+Token seleccionado: especialistas (id: 3089)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 9 | Top tokens: [('establece', 0.19975106), ('vs', 0.20002651), ('llegan', 0.20101525)]
+Token seleccionado: vs (id: 3422)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 10 | Top tokens: [('lengua.', 0.19994049), ('lentamente', 0.19997403), ('llegan', 0.20094158)]
+Token seleccionado: lentamente (id: 4448)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 11 | Top tokens: [('sexuales', 0.19969755), ('lengua.', 0.20031378), ('llegan', 0.20092887)]
+Token seleccionado: sorda, (id: 430)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 85ms/step
+Paso 12 | Top tokens: [('sexuales', 0.19962943), ('lengua.', 0.20040108), ('llegan', 0.20089608)]
+Token seleccionado: lengua. (id: 1842)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 58ms/step
+Paso 13 | Top tokens: [('entren', 0.19980913), ('logrando', 0.19984594), ('llegan', 0.2009434)]
+Token seleccionado: fanáticos (id: 4775)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 14 | Top tokens: [('logrando', 0.19992717), ('entren', 0.20000026), ('llegan', 0.20071843)]
+Token seleccionado: pasado (id: 196)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 15 | Top tokens: [('logrando', 0.19950904), ('llegan', 0.20031229), ('fiestas,', 0.20165311)]
+Token seleccionado: entren (id: 4743)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 16 | Top tokens: [('manera', 0.1994706), ('llegan', 0.20018108), ('fiestas,', 0.20175233)]
+Token seleccionado: llegan (id: 1624)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 17 | Top tokens: [('manera', 0.19952512), ('poco.', 0.19964598), ('fiestas,', 0.20195594)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 18 | Top tokens: [('logrando', 0.19997299), ('basura?', 0.20010063), ('lugares', 0.20016658)]
+Token seleccionado: logrando (id: 2310)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 19 | Top tokens: [('manera', 0.1999922), ('lugares', 0.20022935), ('basura?', 0.20023283)]
+Token seleccionado: manera (id: 193)
+Ejemplo #915
+REFERENCIA: al igual que en argentina, la mayoría aún cree que la sordera es solo una limitación física y no parte de una 
+identidad cultural llamada comunidad sorda, que lucha y tiene derechos e identidad propia.
+PREDICCIÓN: municipio mí altos proyectos. fiestas, manera poco. basura? especialistas vs lentamente sorda, lengua. fanáticos pasado entren llegan fiestas, logrando manera
+MÉTRICAS: BLEU=0.005, WER=0.971
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 0 | Top tokens: [('colectivos', 0.19948055), ('internacionales', 0.19994794), ('altos', 0.20183334)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 1 | Top tokens: [('fiestas,', 0.20003472), ('apenas', 0.20011798), ('internacionales', 0.20060247)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 70ms/step
+Paso 2 | Top tokens: [('mí', 0.19983903), ('internacionales', 0.20027015), ('apenas', 0.20129445)]
+Token seleccionado: novedades (id: 1203)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 3 | Top tokens: [('actor', 0.19959627), ('mí', 0.20054483), ('apenas', 0.20121506)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 68ms/step
+Paso 4 | Top tokens: [('actor', 0.19990657), ('mí', 0.20069082), ('basura?', 0.20095018)]
+Token seleccionado: actor (id: 1817)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 75ms/step
+Paso 5 | Top tokens: [('españa', 0.1996631), ('mí', 0.200322), ('basura?', 0.20184115)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 6 | Top tokens: [('españa', 0.20001513), ('dinamarca,', 0.20004947), ('mí', 0.20032367)]
+Token seleccionado: españa (id: 2087)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 7 | Top tokens: [('mí', 0.19989988), ('futuro.', 0.20005476), ('llegan', 0.20068303)]
+Token seleccionado: llegan (id: 1624)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 8 | Top tokens: [('ciudad', 0.19996968), ('covid,', 0.20001782), ('futuro.', 0.20033963)]
+Token seleccionado: especialistas (id: 3089)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 9 | Top tokens: [('alumnos', 0.1999894), ('futuro.', 0.20006433), ('covid,', 0.20018376)]
+Token seleccionado: instructora (id: 3971)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 10 | Top tokens: [('covid,', 0.19998549), ('personal,', 0.20004034), ('colectivos', 0.20017225)]
+Token seleccionado: personal, (id: 1413)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 11 | Top tokens: [('emprendedores', 0.19989847), ('colectivos', 0.20011501), ('altos', 0.20085178)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 12 | Top tokens: [('emprendedores', 0.20011343), ('colectivos', 0.20016898), ('fiestas,', 0.20091152)]
+Token seleccionado: emprendedores (id: 4537)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 13 | Top tokens: [('sorda,', 0.1997861), ('colectivos', 0.20055628), ('fiestas,', 0.20100938)]
+Token seleccionado: sorda, (id: 430)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 14 | Top tokens: [('apenas', 0.19956902), ('colectivos', 0.20071472), ('fiestas,', 0.20120604)]
+Token seleccionado: alumnos (id: 1442)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 15 | Top tokens: [('apenas', 0.19957042), ('colectivos', 0.20068169), ('fiestas,', 0.20115922)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 43ms/step
+Paso 16 | Top tokens: [('colectivos', 0.20028508), ('basura?', 0.20053133), ('fiestas,', 0.20078044)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 17 | Top tokens: [('acompañan', 0.19973747), ('colectivos', 0.20043734), ('fiestas,', 0.20115818)]
+Token seleccionado: sociales (id: 552)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step
+Paso 18 | Top tokens: [('llegan', 0.19988027), ('colectivos', 0.20011899), ('fiestas,', 0.20089824)]
+Token seleccionado: acompañan (id: 4991)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 19 | Top tokens: [('llegan', 0.20003659), ('colectivos', 0.20022127), ('fiestas,', 0.20094778)]
+Token seleccionado: colectivos (id: 4193)
+Ejemplo #2218
+REFERENCIA: yo quise investigar, pero no sabía a quién consultarle así que recurrí a mi padre.
+PREDICCIÓN: altos fiestas, novedades apenas actor basura? españa llegan especialistas instructora personal, altos emprendedores sorda, alumnos apenas basura? sociales acompañan colectivos
+MÉTRICAS: BLEU=0.000, WER=1.333
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 43ms/step
+Paso 0 | Top tokens: [('apenas', 0.20007896), ('grasas', 0.2005579), ('destinos', 0.20137136)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 1 | Top tokens: [('grasas', 0.20023896), ('altos', 0.20053135), ('destinos', 0.20180337)]
+Token seleccionado: destinos (id: 1767)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 2 | Top tokens: [('internacionales', 0.19967283), ('grasas', 0.19981347), ('altos', 0.20271999)]
+Token seleccionado: grasas (id: 3644)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 3 | Top tokens: [('novedades', 0.19884044), ('fiestas,', 0.20087416), ('altos', 0.20271166)]
+Token seleccionado: internacionales (id: 3079)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 4 | Top tokens: [('basura?', 0.19965208), ('fiestas,', 0.20090237), ('altos', 0.2017871)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 5 | Top tokens: [('españa', 0.2003807), ('basura?', 0.20059595), ('altos', 0.20152593)]
+Token seleccionado: dinamarca, (id: 3723)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 6 | Top tokens: [('españa', 0.20011078), ('altos', 0.20087749), ('basura?', 0.20096858)]
+Token seleccionado: futuro. (id: 1773)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 7 | Top tokens: [('españa', 0.1998451), ('altos', 0.20054942), ('basura?', 0.20099607)]
+Token seleccionado: san (id: 375)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 8 | Top tokens: [('argentina,', 0.1999033), ('altos', 0.20034482), ('basura?', 0.20129493)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 9 | Top tokens: [('llegan', 0.2000735), ('argentina,', 0.20057586), ('altos', 0.2006231)]
+Token seleccionado: personal, (id: 1413)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step
+Paso 10 | Top tokens: [('llegan', 0.20003183), ('argentina,', 0.20043178), ('altos', 0.20071317)]
+Token seleccionado: llegan (id: 1624)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 11 | Top tokens: [('lengua.', 0.19975583), ('argentina,', 0.20061466), ('altos', 0.20070244)]
+Token seleccionado: debido (id: 376)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 43ms/step
+Paso 12 | Top tokens: [('lengua.', 0.19974484), ('argentina,', 0.20064677), ('altos', 0.20065723)]
+Token seleccionado: argentina, (id: 151)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step
+Paso 13 | Top tokens: [('lengua.', 0.19988398), ('diagnóstico', 0.19995464), ('altos', 0.20087647)]
+Token seleccionado: diagnóstico (id: 3390)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 14 | Top tokens: [('sociales', 0.19981451), ('emprendedores', 0.19992016), ('altos', 0.20073207)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step
+Paso 15 | Top tokens: [('sociales', 0.19990584), ('emprendedores', 0.20006418), ('fiestas,', 0.20046449)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 16 | Top tokens: [('apenas', 0.20000024), ('emprendedores', 0.20009136), ('sociales', 0.20030117)]
+Token seleccionado: sociales (id: 552)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 94ms/step
+Paso 17 | Top tokens: [('apenas', 0.2000722), ('lengua.', 0.20009612), ('emprendedores', 0.20031577)]
+Token seleccionado: emprendedores (id: 4537)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 67ms/step
+Paso 18 | Top tokens: [('largo', 0.20001024), ('tango', 0.20001608), ('apenas', 0.20022525)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 19 | Top tokens: [('tango', 0.19964142), ('largo', 0.19990858), ('basura?', 0.20124729)]
+Token seleccionado: basura? (id: 4875)
+Ejemplo #3147
+REFERENCIA: desde 40cm frutos, tomates, morrones, etc.
+PREDICCIÓN: apenas destinos grasas internacionales fiestas, dinamarca, futuro. san basura? personal, llegan debido argentina, diagnóstico altos fiestas, sociales emprendedores apenas basura?
+MÉTRICAS: BLEU=0.000, WER=3.333
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 0 | Top tokens: [('mí', 0.1996792), ('especialistas,', 0.20055254), ('apenas', 0.20146942)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step
+Paso 1 | Top tokens: [('novedades', 0.19970158), ('altos', 0.19975653), ('fiestas,', 0.20177668)]
+Token seleccionado: novedades (id: 1203)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 2 | Top tokens: [('proyectos.', 0.19883831), ('altos', 0.20041087), ('fiestas,', 0.20330043)]
+Token seleccionado: proyectos. (id: 1729)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 72ms/step
+Paso 3 | Top tokens: [('balde', 0.199423), ('altos', 0.20008928), ('fiestas,', 0.20329432)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 4 | Top tokens: [('especialistas', 0.19959015), ('altos', 0.20044512), ('balde', 0.20099108)]
+Token seleccionado: muestra (id: 2854)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 5 | Top tokens: [('llegan', 0.19970053), ('basura?', 0.20014645), ('balde', 0.2009289)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 6 | Top tokens: [('especialistas', 0.20006037), ('balde', 0.20061052), ('llegan', 0.20077573)]
+Token seleccionado: balde (id: 3212)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step
+Paso 7 | Top tokens: [('pacientes', 0.1996097), ('especialistas', 0.20012826), ('llegan', 0.2015202)]
+Token seleccionado: especialistas (id: 3089)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 55ms/step
+Paso 8 | Top tokens: [('altos', 0.19948559), ('pacientes', 0.19996294), ('llegan', 0.20196953)]
+Token seleccionado: poco. (id: 1953)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 9 | Top tokens: [('pacientes', 0.19955556), ('personal,', 0.1997272), ('llegan', 0.20170736)]
+Token seleccionado: vs (id: 3422)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 10 | Top tokens: [('altos', 0.19962859), ('personal,', 0.19995609), ('llegan', 0.20131719)]
+Token seleccionado: personal, (id: 1413)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 11 | Top tokens: [('altos', 0.19985828), ('sorda,', 0.19988412), ('llegan', 0.20094785)]
+Token seleccionado: llegan (id: 1624)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 12 | Top tokens: [('altos', 0.19997491), ('sorda,', 0.20012484), ('acompañan', 0.2003334)]
+Token seleccionado: emprendedores (id: 4537)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 13 | Top tokens: [('organización', 0.1999281), ('sorda,', 0.20008855), ('acompañan', 0.20020556)]
+Token seleccionado: sorda, (id: 430)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 14 | Top tokens: [('series.', 0.19962536), ('acompañan', 0.19981202), ('fiestas,', 0.20144826)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 15 | Top tokens: [('apenas', 0.19996116), ('series.', 0.20002283), ('acompañan', 0.20028235)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 42ms/step
+Paso 16 | Top tokens: [('organización', 0.19989406), ('acompañan', 0.20020106), ('basura?', 0.20044881)]
+Token seleccionado: acompañan (id: 4991)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 17 | Top tokens: [('organización', 0.2000119), ('series.', 0.20020671), ('basura?', 0.20050918)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 18 | Top tokens: [('altos', 0.20004919), ('series.', 0.20034187), ('organización', 0.2005335)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 19 | Top tokens: [('poco.', 0.19964945), ('series.', 0.20063706), ('organización', 0.20075634)]
+Token seleccionado: series. (id: 2867)
+Ejemplo #2875
+REFERENCIA: la formación del planeta tardó entre 10 y 20 millones de años a medida que su superficie se enfriaba y se acumulaba a su alrededor la nube de gases que hoy es la atmosfera.
+PREDICCIÓN: apenas novedades proyectos. fiestas, muestra basura? balde especialistas poco. vs personal, llegan emprendedores sorda, fiestas, apenas acompañan basura? altos series.
+MÉTRICAS: BLEU=0.000, WER=1.000
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 56ms/step
+Paso 0 | Top tokens: [('grasas', 0.19978149), ('mí', 0.20003194), ('altos', 0.20129791)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 1 | Top tokens: [('apenas', 0.200005), ('internacionales', 0.20007136), ('grasas', 0.20027867)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 71ms/step
+Paso 2 | Top tokens: [('internacionales', 0.19971576), ('mí', 0.19977003), ('fiestas,', 0.2021588)]
+Token seleccionado: mí (id: 641)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 112ms/step
+Paso 3 | Top tokens: [('actor', 0.19921492), ('novedades', 0.1994259), ('fiestas,', 0.20345588)]
+Token seleccionado: novedades (id: 1203)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 124ms/step
+Paso 4 | Top tokens: [('españa', 0.19908898), ('basura?', 0.20020731), ('fiestas,', 0.20331061)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 68ms/step
+Paso 5 | Top tokens: [('dinamarca,', 0.19947779), ('españa', 0.20025869), ('basura?', 0.20163688)]
+Token seleccionado: españa (id: 2087)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/step
+Paso 6 | Top tokens: [('actor', 0.1995517), ('dinamarca,', 0.19960819), ('basura?', 0.20228034)]
+Token seleccionado: actor (id: 1817)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 71ms/step
+Paso 7 | Top tokens: [('futuro.', 0.19934665), ('llegan', 0.19989383), ('basura?', 0.2024198)]
+Token seleccionado: ciudad (id: 206)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 8 | Top tokens: [('futuro.', 0.1994486), ('llegan', 0.20045868), ('basura?', 0.20236906)]
+Token seleccionado: llegan (id: 1624)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 48ms/step
+Paso 9 | Top tokens: [('personal,', 0.19936614), ('futuro.', 0.19960323), ('basura?', 0.20241944)]
+Token seleccionado: sorda, (id: 430)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 10 | Top tokens: [('personal,', 0.19955881), ('colectivos', 0.19968213), ('basura?', 0.20204102)]
+Token seleccionado: emprendedores (id: 4537)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step
+Paso 11 | Top tokens: [('colectivos', 0.19985946), ('altos', 0.2003922), ('basura?', 0.20158058)]
+Token seleccionado: poco. (id: 1953)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 64ms/step
+Paso 12 | Top tokens: [('colectivos', 0.19986652), ('altos', 0.20022736), ('basura?', 0.20155965)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 13 | Top tokens: [('colectivos', 0.2001673), ('altos', 0.20035957), ('basura?', 0.2014359)]
+Token seleccionado: personal, (id: 1413)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 14 | Top tokens: [('colectivos', 0.20023969), ('altos', 0.20048226), ('basura?', 0.20129815)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 59ms/step
+Paso 15 | Top tokens: [('colectivos', 0.2001274), ('fiestas,', 0.20050338), ('basura?', 0.20100293)]
+Token seleccionado: nosotros. (id: 701)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 16 | Top tokens: [('colectivos', 0.20013317), ('fiestas,', 0.20068657), ('basura?', 0.20072787)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 17 | Top tokens: [('acompañan', 0.19985019), ('colectivos', 0.20034538), ('fiestas,', 0.2011519)]
+Token seleccionado: tango (id: 4376)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 18 | Top tokens: [('acompañan', 0.19989447), ('colectivos', 0.20031406), ('fiestas,', 0.2011066)]
+Token seleccionado: acompañan (id: 4991)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 61ms/step
+Paso 19 | Top tokens: [('llegan', 0.1999507), ('colectivos', 0.20031573), ('fiestas,', 0.20107272)]
+Token seleccionado: sociales (id: 552)
+Ejemplo #2176
+REFERENCIA: el obelisco cumplió, el domingo pasado, 85 años.
+PREDICCIÓN: altos apenas mí novedades fiestas, españa actor ciudad llegan sorda, emprendedores poco. apenas personal, altos nosotros. basura? tango acompañan sociales
+MÉTRICAS: BLEU=0.000, WER=2.500
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 0 | Top tokens: [('35', 0.19951728), ('recurso', 0.20076603), ('altos', 0.20150343)]
+Token seleccionado: 35 (id: 3653)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 1 | Top tokens: [('destinos', 0.19936556), ('¿cuántas', 0.20023173), ('altos', 0.20181806)]
+Token seleccionado: violencia (id: 1029)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 2 | Top tokens: [('vacunas,', 0.19931436), ('altos', 0.20116065), ('¿cuántas', 0.20117208)]
+Token seleccionado: vacunas, (id: 1380)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 56ms/step
+Paso 3 | Top tokens: [('altos', 0.19947228), ('debido', 0.20109256), ('¿cuántas', 0.20129184)]
+Token seleccionado: ciudad (id: 206)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 62ms/step
+Paso 4 | Top tokens: [('90%', 0.19926953), ('¿cuántas', 0.20184007), ('debido', 0.20192552)]
+Token seleccionado: 90% (id: 3103)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 56ms/step
+Paso 5 | Top tokens: [('sigan', 0.1986394), ('debido', 0.20201741), ('¿cuántas', 0.2022497)]
+Token seleccionado: buscan (id: 1078)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 6 | Top tokens: [('sigan', 0.19937201), ('debido', 0.20084715), ('¿cuántas', 0.20208646)]
+Token seleccionado: energía, (id: 1801)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 57ms/step
+Paso 7 | Top tokens: [('seguirnos', 0.19932805), ('sigan', 0.20033522), ('¿cuántas', 0.20191497)]
+Token seleccionado: sigan (id: 1122)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 8 | Top tokens: [('televisión,', 0.19973728), ('seguirnos', 0.20006762), ('¿cuántas', 0.20127882)]
+Token seleccionado: televisión, (id: 3421)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 9 | Top tokens: [('razón,', 0.19995922), ('medicamentos,', 0.20001878), ('¿cuántas', 0.20077407)]
+Token seleccionado: ¿cuántas (id: 4159)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 10 | Top tokens: [('transmitir', 0.19990095), ('medicamentos,', 0.20025624), ('razón,', 0.20032491)]
+Token seleccionado: medicamentos, (id: 3349)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 11 | Top tokens: [('consultas', 0.19998689), ('razón,', 0.20029768), ('transmitir', 0.20046932)]
+Token seleccionado: transmitir (id: 2908)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 12 | Top tokens: [('existe', 0.20000556), ('razón,', 0.20042415), ('consultas', 0.20044278)]
+Token seleccionado: existe (id: 679)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 13 | Top tokens: [('figura', 0.19991733), ('razón,', 0.200039), ('consultas', 0.20059395)]
+Token seleccionado: mamá (id: 1084)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 14 | Top tokens: [('figura', 0.19987975), ('destinos', 0.19994855), ('consultas', 0.20063393)]
+Token seleccionado: allá (id: 586)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 15 | Top tokens: [('figura', 0.20007607), ('destinos', 0.20029329), ('consultas', 0.20058663)]
+Token seleccionado: figura (id: 2989)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 16 | Top tokens: [('edad', 0.19991212), ('destinos', 0.20039217), ('consultas', 0.20064881)]
+Token seleccionado: consultas (id: 3168)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 17 | Top tokens: [('imposible', 0.20005468), ('edad', 0.20022917), ('destinos', 0.2008314)]
+Token seleccionado: transporte, (id: 3491)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 18 | Top tokens: [('imposible', 0.20019846), ('edad', 0.20051019), ('destinos', 0.20084293)]
+Token seleccionado: secretario (id: 4963)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 19 | Top tokens: [('edad', 0.2001504), ('destinos', 0.20047097), ('televisión,', 0.20087704)]
+Token seleccionado: televisión, (id: 3421)
+Ejemplo #2777
+REFERENCIA: si lo medimos, estaríamos hablando de 1,6 millones kilómetros cuadrados.
+PREDICCIÓN: 35 violencia vacunas, ciudad 90% buscan energía, sigan televisión, ¿cuántas medicamentos, transmitir existe mamá allá figura consultas transporte, secretario televisión,
+MÉTRICAS: BLEU=0.000, WER=2.000
+--------------------------------------------------------------------------------
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 40ms/step
+Temperatura de sampling: 1.0, Top-k: 5, Nucleus: 0.8
+Valor actual de teacher forcing ratio: 0.80 (solo para referencia)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 50ms/step
+Paso 0 | Top tokens: [('colectivos', 0.19948739), ('internacionales', 0.19982737), ('altos', 0.20206928)]
+Token seleccionado: colectivos (id: 4193)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/step
+Paso 1 | Top tokens: [('apenas', 0.19957143), ('internacionales', 0.19967058), ('altos', 0.20263939)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 2 | Top tokens: [('internacionales', 0.19915302), ('fiestas,', 0.20147237), ('altos', 0.20296745)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 3 | Top tokens: [('actor', 0.19937967), ('mí', 0.19968267), ('fiestas,', 0.2032127)]
+Token seleccionado: actor (id: 1817)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 44ms/step
+Paso 4 | Top tokens: [('mí', 0.19962883), ('basura?', 0.2004579), ('fiestas,', 0.20309713)]
+Token seleccionado: muestra (id: 2854)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 54ms/step
+Paso 5 | Top tokens: [('mí', 0.19955525), ('basura?', 0.20096162), ('fiestas,', 0.2025668)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 93ms/step
+Paso 6 | Top tokens: [('llegan', 0.19932212), ('mí', 0.19965465), ('fiestas,', 0.20273069)]
+Token seleccionado: dinamarca, (id: 3723)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 56ms/step
+Paso 7 | Top tokens: [('alumnos', 0.1992214), ('llegan', 0.20029676), ('fiestas,', 0.20226572)]
+Token seleccionado: alumnos (id: 1442)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step
+Paso 8 | Top tokens: [('covid,', 0.1990729), ('llegan', 0.20107241), ('fiestas,', 0.20212325)]
+Token seleccionado: futuro. (id: 1773)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 9 | Top tokens: [('covid,', 0.1993257), ('llegan', 0.20124711), ('fiestas,', 0.20175919)]
+Token seleccionado: fiestas, (id: 4399)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 73ms/step
+Paso 10 | Top tokens: [('sorda,', 0.19963829), ('covid,', 0.1997055), ('llegan', 0.20163947)]
+Token seleccionado: covid, (id: 1665)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+Paso 11 | Top tokens: [('emprendedores', 0.1999194), ('colectivos', 0.19992673), ('llegan', 0.20105082)]
+Token seleccionado: llegan (id: 1624)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 46ms/step
+Paso 12 | Top tokens: [('sorda,', 0.19997759), ('colectivos', 0.20009658), ('emprendedores', 0.2004619)]
+Token seleccionado: emprendedores (id: 4537)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 13 | Top tokens: [('sorda,', 0.19991581), ('colectivos', 0.20024629), ('altos', 0.20063637)]
+Token seleccionado: colectivos (id: 4193)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 57ms/step
+Paso 14 | Top tokens: [('da', 0.1998004), ('sorda,', 0.20005536), ('altos', 0.20075932)]
+Token seleccionado: altos (id: 3643)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 52ms/step
+Paso 15 | Top tokens: [('da', 0.200052), ('sorda,', 0.20012458), ('acompañan', 0.20013733)]
+Token seleccionado: apenas (id: 832)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 56ms/step
+Paso 16 | Top tokens: [('sorda,', 0.19988905), ('acompañan', 0.19999546), ('basura?', 0.20067328)]
+Token seleccionado: nosotros. (id: 701)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+Paso 17 | Top tokens: [('da', 0.19986807), ('acompañan', 0.20008339), ('basura?', 0.20052034)]
+Token seleccionado: sorda, (id: 430)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 53ms/step
+Paso 18 | Top tokens: [('da', 0.1999737), ('acompañan', 0.2002404), ('basura?', 0.20043287)]
+Token seleccionado: basura? (id: 4875)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 47ms/step
+Paso 19 | Top tokens: [('sociales', 0.19984949), ('da', 0.20033199), ('acompañan', 0.2004311)]
+Token seleccionado: da (id: 306)
+Ejemplo #956
+REFERENCIA: tengo derecho a elegir con qué lengua me comunico.
+PREDICCIÓN: colectivos apenas altos actor muestra basura? dinamarca, alumnos futuro. fiestas, covid, llegan emprendedores 
+colectivos altos apenas nosotros. sorda, basura? da
+MÉTRICAS: BLEU=0.000, WER=2.222
+--------------------------------------------------------------------------------
+
+=== RESULTADOS FINALES ===
+BLEU promedio (10 ejemplos): 0.000
+WER promedio (10 ejemplos): 1.836
+
+Entrenamiento y evaluación completados.
+
+Guardando artefactos del modelo para inferencia...
+Tokenizer guardado en: models/seq2seq_artefacts\tokenizer.pkl
+Modelo Encoder guardado en: models/seq2seq_artefacts\encoder_model.keras
+Modelo Decoder guardado en: models/seq2seq_artefacts\decoder_model.keras
+
+Proceso finalizado. Los artefactos están listos para ser usados en la aplicación web.
+
+Entonces, teniendo en cuenta que las predicciones actuales que hace el modelo son muy pobres (palabras random), necesito hacer un entrenamiento mas grande, que parametros hay que cambiar? ya modifique la temperatura mas baja para reducir aleatoriedad, y subi el numero de palabras
